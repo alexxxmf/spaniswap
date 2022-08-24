@@ -1,0 +1,23 @@
+{
+  "name": "spaniswap",
+  "version": "1.0.0",
+  "description": "Another uniswap clone coded from scratch",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexxxmf/spaniswap.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexxxmf/spaniswap/issues"
+  },
+  "homepage": "https://github.com/alexxxmf/spaniswap#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^1.0.2",
+    "hardhat": "^2.10.2"
+  }
+}
