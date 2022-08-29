@@ -68,6 +68,23 @@ contract SpaniswapV2Pair is ERC20, SafeMath{
 
   }
 
+  function burn() public {
+    uint256 balance0 = ERC20(token0).balanceOf(address(this));
+    uint256 balance1 = ERC20(token1).balanceOf(address(this));
+
+    uint256 liquidity = balanceOf[msg.sender];
+
+    uint256 amount0 = (liquidity * balance0) / totalSupply;
+    uint256 amount1 = (liquidity * balance1) / totalSupply;
+
+    if (amount0 <= 0 || amount1 <= 0) revert InsufficientLiquidityBurned();
+
+    _burn(msg.sender, liquidity);
+
+    emit Burn(msg.sender, amount0, amount1);
+
+  }
+
   function getReserves()
     public
     view
@@ -86,4 +103,18 @@ contract SpaniswapV2Pair is ERC20, SafeMath{
     emit Sync(_reserve0, _reserve1);
   }
 
+  // regarding using call to send tokens to someone
+  // https://ethereum.stackexchange.com/questions/19341/address-send-vs-address-transfer-best-practice-usage
+    function _safeTransfer(
+      address token,
+      address to,
+      uint256 value
+    ) private {
+      (bool success, bytes memory data) = token.call(
+        abi.encodeWithSignature("transfer(address,uint256)", to, value)
+      );
+      // this way we can avoid using gas if any problem arises
+      if (!success || (data.length != 0 && !abi.decode(data, (bool))))
+        revert TransferFailed();
+    }
 }
