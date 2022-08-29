@@ -21,6 +21,10 @@ contract SpaniswapV2Pair is ERC20, SafeMath{
   address public token0;
   address public token1;
 
+  event Burn(address indexed sender, uint256 amount0, uint256 amount1);
+  event Mint(address indexed sender, uint256 amount0, uint256 amount1);
+  event Sync(uint256 reserve0, uint256 reserve1);
+
   constructor(address _token0, address _token1) 
     ERC20("Spaniswap LP token", "SPANV2", 18)
   {
@@ -57,7 +61,10 @@ contract SpaniswapV2Pair is ERC20, SafeMath{
     // https://medium.com/blockchannel/the-use-of-revert-assert-and-require-in-solidity-and-the-new-revert-opcode-in-the-evm-1a3a7990e06e
     if (liquidity <= 0) revert InsufficientLiquidityMinted();
 
-    _mint()
+    _mint(msg.sender, liquidity);
+    _updateReserves(balance0, balance1);
+
+    emit Mint(msg.sender, amount0, amount1);
 
   }
 
@@ -75,6 +82,8 @@ contract SpaniswapV2Pair is ERC20, SafeMath{
   function _updateReserves(uint256 _reserve0, uint256 _reserve1) private{
     reserve0 = _reserve0;
     reserve1 = _reserve1;
+
+    emit Sync(_reserve0, _reserve1);
   }
 
 }
