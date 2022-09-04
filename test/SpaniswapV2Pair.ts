@@ -6,6 +6,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { ERC20Mintable, SpaniswapV2Pair } from "../typechain-types";
 
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 describe("SpaniswapV2Pair", function () {
   let owner: SignerWithAddress;
   let address1: SignerWithAddress;
@@ -33,12 +35,15 @@ describe("SpaniswapV2Pair", function () {
       // Arrange
       await token1.mint(9 * 10 ** 6, tokenLp.address);
       await token2.mint(5 * 10 ** 6, tokenLp.address);
+      const minLiquidityBN = await tokenLp.MINIMUM_LIQUIDITY();
+      const minLiquidity = minLiquidityBN.toNumber();
 
       // Act
       await tokenLp.mint();
 
       // Asert
       expect(await tokenLp.balanceOf(owner.address)).to.equal(6707203);
+      expect(await tokenLp.balanceOf(ZERO_ADDRESS)).to.equal(minLiquidity);
     });
   });
 });
