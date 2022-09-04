@@ -10,7 +10,14 @@ error InsufficientLiquidityMinted();
 error InsufficientLiquidityBurned();
 error TransferFailed();
 
-contract SpaniswapV2Pair is ERC20, SafeMath{
+interface IERC20 {
+  function balanceOf(address) external returns (uint256);
+
+  function transfer(address to, uint256 amount) external;
+}
+
+
+contract SpaniswapV2Pair is ERC20, Math{
   // placeholder, yet to be decided
   uint256 public MINIMUM_LIQUIDITY = 1000;
   // This is to store reserves for both sides of the pair
@@ -33,8 +40,8 @@ contract SpaniswapV2Pair is ERC20, SafeMath{
   }
 
   function mint() public {
-    uint256 balance0 = ERC20(token0).balanceOf(address(this));
-    uint256 balance1 = ERC20(token1).balanceOf(address(this));
+    uint256 balance0 = IERC20(token0).balanceOf(address(this));
+    uint256 balance1 = IERC20(token1).balanceOf(address(this));
 
     (uint256 _reserve0, uint256 _reserve1) = getReserves();
     // How much was received in the last liquidity addition by user
@@ -69,8 +76,8 @@ contract SpaniswapV2Pair is ERC20, SafeMath{
   }
 
   function burn() public {
-    uint256 balance0 = ERC20(token0).balanceOf(address(this));
-    uint256 balance1 = ERC20(token1).balanceOf(address(this));
+    uint256 balance0 = IERC20(token0).balanceOf(address(this));
+    uint256 balance1 = IERC20(token1).balanceOf(address(this));
 
     uint256 liquidity = balanceOf[msg.sender];
 
@@ -80,6 +87,14 @@ contract SpaniswapV2Pair is ERC20, SafeMath{
     if (amount0 <= 0 || amount1 <= 0) revert InsufficientLiquidityBurned();
 
     _burn(msg.sender, liquidity);
+
+    _safeTransfer(token0, msg.sender, amount0);
+    _safeTransfer(token1, msg.sender, amount1);
+
+    balance0 = IERC20(token0).balanceOf(address(this));
+    balance1 = IERC20(token1).balanceOf(address(this));
+
+    _updateReserves(balance0, balance1);
 
     emit Burn(msg.sender, amount0, amount1);
 
