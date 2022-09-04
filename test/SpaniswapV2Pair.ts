@@ -31,7 +31,7 @@ describe("SpaniswapV2Pair", function () {
     tokenLp = await SpaniswapV2Pair.deploy(token1.address, token2.address);
   });
   describe("Mint", function () {
-    it("should mint LP tokens", async () => {
+    it("should mint LP tokens and send some liquidity to zero address when liquidity is first added", async () => {
       // Arrange
       await token1.mint(9 * 10 ** 6, tokenLp.address);
       await token2.mint(5 * 10 ** 6, tokenLp.address);
@@ -44,6 +44,26 @@ describe("SpaniswapV2Pair", function () {
       // Asert
       expect(await tokenLp.balanceOf(owner.address)).to.equal(6707203);
       expect(await tokenLp.balanceOf(ZERO_ADDRESS)).to.equal(minLiquidity);
+    });
+  });
+  describe("Burn", () => {
+    before(async () => {
+      await token1.mint(9 * 10 ** 6, tokenLp.address);
+      await token2.mint(5 * 10 ** 6, tokenLp.address);
+      await tokenLp.mint();
+    });
+    it("should burn LP tokens and send back to user both tokens for the pair", async () => {
+      // Arrange
+      const initialLpTokenBalance = await tokenLp.balanceOf(owner.address);
+
+      // Act
+      await tokenLp.burn();
+
+      // Assert
+      expect(initialLpTokenBalance).to.not.equal(0);
+      expect(await tokenLp.balanceOf(owner.address)).to.equal(0);
+      expect(await token1.balanceOf(owner.address)).to.not.equal(0);
+      expect(await token2.balanceOf(owner.address)).to.not.equal(0);
     });
   });
 });
